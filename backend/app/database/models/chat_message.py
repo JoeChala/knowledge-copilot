@@ -21,7 +21,7 @@ class ChatMessage(Base):
     __table_args__ = (
         UniqueConstraint("thread_id", "sequence", name="uq_chat_messages_thread_sequence"),
         Index("ix_chat_messages_thread_id", "thread_id"),
-    )
+    )    
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
