@@ -1,10 +1,19 @@
 from __future__ import annotations
-# automatically stores the class annotations(self) as a string to avoid errors
+
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, Text, UniqueConstraint, func
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    Integer,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -19,9 +28,11 @@ if TYPE_CHECKING:
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
     __table_args__ = (
-        UniqueConstraint("thread_id", "sequence", name="uq_chat_messages_thread_sequence"),
+        UniqueConstraint(
+            "thread_id", "sequence", name="uq_chat_messages_thread_sequence"
+        ),
         Index("ix_chat_messages_thread_id", "thread_id"),
-    )    
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -29,11 +40,11 @@ class ChatMessage(Base):
     thread_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("chat_threads.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
     )
     role: Mapped[MessageRole] = mapped_column(
         Enum(MessageRole, name="message_role", native_enum=False),
-        nullable=False
+        nullable=False,
     )
     content: Mapped[str | None] = mapped_column(Text)
     parts: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)
@@ -44,10 +55,9 @@ class ChatMessage(Base):
         nullable=False,
     )
 
-    thread: Mapped[ChatThread] = relationship(back_populates="message")
+    thread: Mapped[ChatThread] = relationship(back_populates="messages")
     citations: Mapped[list[MessageCitation]] = relationship(
         back_populates="message",
         cascade="all, delete-orphan",
         order_by="MessageCitation.citation_index",
     )
-

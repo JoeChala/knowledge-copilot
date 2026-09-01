@@ -1,11 +1,14 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.auth.dependencies import CurrentUser,get_current_user
 import uvicorn
 
+from app.api.auth import router as auth_router
+from app.api.chat import router as chat_router
 from app.config import settings
 
 app = FastAPI(title="Document Copilot")
+app.include_router(auth_router)
+app.include_router(chat_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,15 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/health")
-async def health() -> dict[str,str]:
+async def health() -> dict[str, str]:
     return {"status": "ok"}
 
-@app.get("/me")
-async def get_me(
-    user: CurrentUser = Depends(get_current_user)
-    ):
-    return user
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000)
